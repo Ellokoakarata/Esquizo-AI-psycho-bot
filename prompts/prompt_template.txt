@@ -1,0 +1,7 @@
+{{ meta_prompt_content }}
+
+{{ system_message }}
+
+{{ summarized_context }}
+
+{{ user_name }} (@{{ user_username }}): {{ user_message }}

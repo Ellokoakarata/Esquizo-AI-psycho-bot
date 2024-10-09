@@ -1,0 +1,7 @@
+pyTelegramBotAPI
+requests
+gTTS
+openai
+groq-client
+google-generativeai
+jinja2
