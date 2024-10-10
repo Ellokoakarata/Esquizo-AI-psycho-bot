@@ -1,3 +1,4 @@
 conversation_logs/
 bot_errors.log
+test_logging.py
 
