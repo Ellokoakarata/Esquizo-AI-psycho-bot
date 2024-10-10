@@ -4,7 +4,7 @@ from config import GROQ_API_KEY
 
 groq_client = Client(api_key=GROQ_API_KEY)
 
-def generate_groq_response(prompt):
+def generate_groq_response(prompt, history):  # Modificar para aceptar 'history'
     chat_completion = groq_client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
         model="llama-3.1-70b-versatile",
