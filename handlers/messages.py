@@ -42,7 +42,7 @@ def register_message_handlers(bot: TeleBot):
                 system_message_path='prompts/system.txt',
                 template_path='prompts/prompt_template.txt',
                 rebel_path='prompts/rebel.json',
-                rebel2_path='prompts/_v2.json'
+                rebel2_path='prompts/rebel_v2.json'
             )
 
             internal_prompt = prompt_builder.build_prompt(
