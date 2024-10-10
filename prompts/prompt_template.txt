@@ -2,6 +2,10 @@
 
 {{ system_message }}
 
+{{rebel_v1}}
+
+{{rebel_v2}}
+
 {{ summarized_context }}
 
 {{ user_name }} (@{{ user_username }}): {{ user_message }}

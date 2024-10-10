@@ -38,9 +38,11 @@ def register_message_handlers(bot: TeleBot):
 
             # Construir el prompt
             prompt_builder = PromptBuilder(
-                meta_prompt_path='prompts/meta_prompt.md',
+                meta_prompt_path='prompts/meta_prompt_caotico_visceral (1).md',
                 system_message_path='prompts/system.txt',
-                template_path='prompts/prompt_template.txt'
+                template_path='prompts/prompt_template.txt',
+                rebel_path='prompts/rebel.json',
+                rebel2_path='prompts/_v2.json'
             )
 
             internal_prompt = prompt_builder.build_prompt(
