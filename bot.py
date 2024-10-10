@@ -3,12 +3,9 @@ import sys
 import os
 import logging
 import time
-from telebot.apihelper import ApiException
+import signal
+from telebot import TeleBot, apihelper
 from requests.exceptions import RequestException
-
-# Configurar logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
 
 # Añade el directorio raíz, utils y handlers al sys.path
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -16,11 +13,17 @@ sys.path.insert(0, project_root)
 sys.path.insert(0, os.path.join(project_root, 'utils'))
 sys.path.insert(0, os.path.join(project_root, 'handlers'))
 
-from telebot import TeleBot
 from config import TELEGRAM_TOKEN
 from handlers.commands import register_command_handlers
 from handlers.messages import register_message_handlers
-import signal
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Ajustar el timeout global para las solicitudes a la API de Telegram
+apihelper.CONNECT_TIMEOUT = 30  # Puedes ajustar este valor según tus necesidades
+apihelper.READ_TIMEOUT = 30
 
 bot = TeleBot(TELEGRAM_TOKEN)
 
@@ -33,14 +36,14 @@ def run_bot_with_reconnect(bot):
         try:
             logger.info("Iniciando el bot...")
             bot.polling(none_stop=True, interval=0, timeout=20)
-        except ApiException as e:
+        except apihelper.ApiException as e:
             logger.error(f"Error de API de Telegram: {e}")
             time.sleep(5)
         except RequestException as e:
             logger.error(f"Error de conexión: {e}")
             time.sleep(5)
         except Exception as e:
-            logger.error(f"Error inesperado: {e}")
+            logger.error(f"Error inesperado: {e}", exc_info=True)
             time.sleep(5)
         logger.info("Intentando reconectar...")
 

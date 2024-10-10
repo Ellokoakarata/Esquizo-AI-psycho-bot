@@ -1,6 +1,7 @@
 # handlers/messages.py
 import logging
-from telebot import TeleBot
+import time
+from telebot import TeleBot, apihelper
 from utils.error_handling import handle_error
 from utils.history import ConversationHistory
 from utils.prompts import PromptBuilder
@@ -9,10 +10,11 @@ from utils import summarize_messages
 from models.groq_model import generate_groq_response
 from models.google_model import generate_google_response
 from config import GOOGLE_API_KEY, GROQ_API_KEY
-import os
+from requests.exceptions import ConnectionError, ReadTimeout
+from urllib3.exceptions import ProtocolError
+from http.client import RemoteDisconnected  # Importación corregida
 
 # Configurar logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def register_message_handlers(bot: TeleBot):
@@ -34,7 +36,7 @@ def register_message_handlers(bot: TeleBot):
             # Resumir el contexto
             relevant_messages = history.history['messages'][-5:]
             summarized_context = summarize_messages(relevant_messages)
-            logger.info(f"Contexto resumido: {len(summarized_context)} mensajes")
+            logger.info(f"Contexto resumido: {len(relevant_messages)} mensajes")
 
             # Construir el prompt
             prompt_builder = PromptBuilder(
@@ -58,7 +60,7 @@ def register_message_handlers(bot: TeleBot):
 
             if modelo_seleccionado == 'groq' and GROQ_API_KEY:
                 logger.info("Generando respuesta con Groq")
-                reply_content = generate_groq_response(internal_prompt)
+                reply_content = generate_groq_response(internal_prompt, history)
             elif modelo_seleccionado == 'google' and GOOGLE_API_KEY:
                 logger.info("Generando respuesta con Google")
                 reply_content = generate_google_response(internal_prompt, history)
@@ -67,19 +69,36 @@ def register_message_handlers(bot: TeleBot):
                 reply_content = "No hay un modelo disponible para generar una respuesta."
 
             if reply_content:
-                history.add_message("assistant", reply_content)
-                history.save_history()
-                logger.info(f"Respuesta generada y guardada: {reply_content[:50]}...")
-                bot.reply_to(message, reply_content)
+                success = send_message_with_retries(bot, message.chat.id, reply_content)
+                if success:
+                    history.add_message("assistant", reply_content)
+                    history.save_history()
+                    logger.info(f"Respuesta generada y guardada: {reply_content[:50]}...")
+                else:
+                    logger.error("No se pudo enviar el mensaje al usuario después de varios intentos.")
             else:
                 logger.warning("No se pudo generar una respuesta clara")
-                bot.reply_to(message, "No tengo una respuesta clara. El caos es extraño hoy.")
+                send_message_with_retries(bot, message.chat.id, "No tengo una respuesta clara. El caos es extraño hoy.")
 
             logger.info("Procesamiento del mensaje completado")
 
         except Exception as e:
-            logger.error(f"Error al procesar el mensaje: {e}")
-            bot.reply_to(message, "Lo siento, estoy experimentando algunas dificultades técnicas. Estoy trabajando para resolverlas. Por favor, intenta de nuevo más tarde.")
-            
-        finally:
-            logger.info("Procesamiento del mensaje completado")
+            logger.error(f"Error al procesar el mensaje: {e}", exc_info=True)
+            send_message_with_retries(bot, message.chat.id, "Lo siento, estoy experimentando algunas dificultades técnicas. Por favor, intenta de nuevo más tarde.")
+
+    def send_message_with_retries(bot, chat_id, text, max_retries=3):
+        retries = 0
+        while retries < max_retries:
+            try:
+                bot.send_message(chat_id, text)
+                return True  # Mensaje enviado con éxito
+            except (ConnectionError, ReadTimeout, ProtocolError, RemoteDisconnected, apihelper.ApiException) as e:
+                retries += 1
+                wait_time = 2 ** retries  # Exponencial backoff
+                logger.warning(f"Error al enviar mensaje: {e}. Reintentando en {wait_time} segundos...")
+                time.sleep(wait_time)
+            except Exception as e:
+                logger.error(f"Error desconocido al enviar mensaje: {e}", exc_info=True)
+                break
+        logger.error("No se pudo enviar el mensaje después de varios intentos.")
+        return False
