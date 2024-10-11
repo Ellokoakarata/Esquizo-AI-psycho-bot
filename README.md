@@ -81,10 +81,10 @@ Este proyecto está licenciado bajo la Licencia MIT. Consulta el archivo `LICENS
 # Contacto
 Para preguntas, sugerencias o reportar problemas, puedes abrir un Issue en GitHub o contactar al mantenedor del proyecto:
 - **Nombre:** [Ricardo Ruiz]
-- **Correo Electrónico:** [raruiz@netsat.com]
+- **Correo Electrónico:** [rasricardo25@gmail.com]
 - **Telegram:** [@Loko_Akrata]
 
 # Agradecimientos
-Agradecemos a todos los desarrolladores y colaboradores que han contribuido directa o indirectamente a este proyecto, y a las comunidades de código abierto que lo hacen posible.
+Agradecemos a todos los desarrolladores y colaboradores que han contribuido directa o indirectamente a este proyecto, y a las comunidades de código abierto que lo hacen posible. Y sobre todo a la IA.
 
 **Nota:** Este proyecto es experimental y se proporciona "tal cual". Se recomienda revisar y entender el código antes de su implementación en entornos de producción.
