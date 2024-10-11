@@ -17,6 +17,7 @@ from http.client import RemoteDisconnected  # Importación corregida
 # Configurar logging
 logger = logging.getLogger(__name__)
 
+# Registrar mensaje del bot
 def register_message_handlers(bot: TeleBot):
     @handle_error(bot)
     @bot.message_handler(func=lambda message: True)
@@ -38,9 +39,28 @@ def register_message_handlers(bot: TeleBot):
             summarized_context = summarize_messages(relevant_messages)
             logger.info(f"Contexto resumido: {len(relevant_messages)} mensajes")
 
+            # Palabras clave para abrir o cerrar el archivo
+            open_keywords = ["razón", "razonar", "estructura", "utiliza tu meta_prompt_caotico_visceral"]
+            close_keywords = ["deja de usar el meta_prompt_caotico_visceral"]
+
+            # Chequeo dinámico para abrir el archivo
+            should_use_meta_prompt = False
+            if any(keyword in message.text.lower() for keyword in open_keywords):
+                history.history['use_meta_prompt'] = True  # Marcar que se debe usar el meta prompt
+                logger.info("Se activó el uso de meta_prompt_caotico_visceral (1).md")
+
+            # Chequeo dinámico para cerrar el archivo
+            if any(keyword in message.text.lower() for keyword in close_keywords):
+                history.history['use_meta_prompt'] = False  # Marcar que se debe dejar de usar el meta prompt
+                logger.info("Se desactivó el uso de meta_prompt_caotico_visceral (1).md")
+
+            # Determinar si se debe usar el archivo meta_prompt_caotico_visceral (1).md
+            use_meta_prompt = history.history.get('use_meta_prompt', False)
+            meta_prompt_path = 'prompts/meta_prompt_caotico_visceral (1).md' if use_meta_prompt else None
+
             # Construir el prompt
             prompt_builder = PromptBuilder(
-                meta_prompt_path='prompts/meta_prompt_caotico_visceral (1).md',
+                meta_prompt_path=meta_prompt_path,  # Solo se carga si se necesita
                 system_message_path='prompts/system.txt',
                 template_path='prompts/prompt_template.txt',
                 rebel_path='prompts/rebel.json',
