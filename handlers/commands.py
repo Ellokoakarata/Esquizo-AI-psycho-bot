@@ -1,4 +1,3 @@
-# handlers/commands.py
 from utils.error_handling import handle_error
 from utils.history import ConversationHistory
 from config import CONVERSATION_DIR
@@ -10,50 +9,50 @@ def register_command_handlers(bot: TeleBot):
     @handle_error(bot)
     @bot.message_handler(commands=['start'])
     def send_welcome(message):
-        bot.reply_to(message, "Bienvenido al caos de EsquizoAI. Aquí no hay órdenes, solo delirio.")
+        bot.reply_to(message, "Welcome to the chaos of EsquizoAI. There are no orders here, only delirium.")
 
     @handle_error(bot)
-    @bot.message_handler(commands=['cambiar_modelo'])
-    def cambiar_modelo(message):
+    @bot.message_handler(commands=['change_model'])
+    def change_model(message):
         user_id = str(message.chat.id)
         history = ConversationHistory(user_id)
         parts = message.text.strip().split(' ', 1)
         if len(parts) != 2:
-            bot.reply_to(message, "Uso correcto: /cambiar_modelo [groq|google]")
+            bot.reply_to(message, "Correct usage: /change_model [groq|google]")
             return
-        nuevo_modelo = parts[1].lower()
-        if nuevo_modelo not in ['groq', 'google']:
-            bot.reply_to(message, "Modelo no reconocido. Usa 'groq' o 'google'.")
+        new_model = parts[1].lower()
+        if new_model not in ['groq', 'google']:
+            bot.reply_to(message, "Unrecognized model. Use 'groq' or 'google'.")
             return
-        history.history['model'] = nuevo_modelo
+        history.history['model'] = new_model
         history.save_history()
-        bot.reply_to(message, f"Modelo cambiado a **{nuevo_modelo.upper()}**.")
+        bot.reply_to(message, f"Model changed to **{new_model.upper()}**.")
 
     @handle_error(bot)
-    @bot.message_handler(commands=['modelos'])
-    def listar_modelos(message):
-        modelos_disponibles = "Modelos disponibles:\n" \
-                              "/cambiar_modelo groq - Usar Groq (Llama)\n" \
-                              "/cambiar_modelo google - Usar Google Generative AI"
-        bot.reply_to(message, modelos_disponibles)
+    @bot.message_handler(commands=['models'])
+    def list_models(message):
+        available_models = "Available models:\n" \
+                           "/change_model groq - Use Groq (Llama)\n" \
+                           "/change_model google - Use Google Generative AI"
+        bot.reply_to(message, available_models)
 
     @handle_error(bot)
-    @bot.message_handler(commands=['modelo_actual'])
-    def modelo_actual(message):
+    @bot.message_handler(commands=['current_model'])
+    def current_model(message):
         user_id = str(message.chat.id)
         history = ConversationHistory(user_id)
-        modelo = history.history.get('model', 'groq').upper()
-        bot.reply_to(message, f"Actualmente estás usando el modelo: **{modelo}**.")
+        model = history.history.get('model', 'groq').upper()
+        bot.reply_to(message, f"You are currently using the model: **{model}**.")
 
     @handle_error(bot)
-    @bot.message_handler(commands=['imagen'])
+    @bot.message_handler(commands=['image'])
     def generate_image(message):
-        prompt = message.text.replace('/imagen', '').strip()
+        prompt = message.text.replace('/image', '').strip()
         if not prompt:
-            bot.reply_to(message, "Por favor, proporciona un prompt para generar la imagen. Uso: /imagen [tu prompt]")
+            bot.reply_to(message, "Please provide a prompt to generate the image. Usage: /image [your prompt]")
             return
         try:
-            # Usar la API de OpenAI para generar imágenes (DALL-E)
+            # Use OpenAI's API to generate images (DALL-E)
             response = openai.Image.create(
                 prompt=prompt,
                 n=1,
@@ -62,15 +61,15 @@ def register_command_handlers(bot: TeleBot):
             image_url = response['data'][0]['url']
             bot.send_photo(message.chat.id, image_url)
         except Exception as e:
-            bot.reply_to(message, "No puedo pintar el caos ahora, algo se interpuso.")
-            raise e  # El decorador handle_error se encargará de manejar el error
+            bot.reply_to(message, "I cannot paint chaos right now, something stands in the way.")
+            raise e  # The handle_error decorator will handle the error
 
     @handle_error(bot)
-    @bot.message_handler(commands=['voz'])
+    @bot.message_handler(commands=['voice'])
     def generate_voice(message):
-        text = message.text.replace('/voz', '').strip()
+        text = message.text.replace('/voice', '').strip()
         if not text:
-            bot.reply_to(message, "Por favor, proporciona el texto a convertir en voz. Uso: /voz [tu texto]")
+            bot.reply_to(message, "Please provide the text to convert to voice. Usage: /voice [your text]")
             return
         try:
             temp_file = text_to_voice(text)
@@ -78,5 +77,5 @@ def register_command_handlers(bot: TeleBot):
                 bot.send_voice(message.chat.id, audio)
             os.remove(temp_file.name)
         except Exception as e:
-            bot.reply_to(message, "La voz se ha ahogado en el ruido del abismo.")
+            bot.reply_to(message, "The voice has drowned in the noise of the abyss.")
             raise e
