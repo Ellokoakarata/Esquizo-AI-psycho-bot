@@ -90,5 +90,7 @@ Agradecemos a todos los desarrolladores y colaboradores que han contribuido dire
 **Nota:** Este proyecto es experimental y se proporciona "tal cual". Se recomienda revisar y entender el código antes de su implementación en entornos de producción.
 
 **Bot:** https://t.me/esquizoAI_bot
+
 **Grupo:** https://t.me/esquizoai
+
 **Esquizo-AI-psycho-bot en Chat-GPT:** https://chatgpt.com/g/g-tHKT4DO8c-esquizoai-psycho-bot
