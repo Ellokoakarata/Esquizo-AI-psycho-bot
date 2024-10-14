@@ -45,10 +45,10 @@ class ConversationHistory:
         with open(self.user_file, "w", encoding="utf-8") as file:
             json.dump(self.history, file, ensure_ascii=False, indent=4)
 
-    def add_message(self, role, content, username=None):
+    def add_message(self, role, content, username=None, chat_id=None):
         """
         Agregar un mensaje al historial de conversación, incluyendo el rol (user o assistant), el contenido,
-        el nombre de usuario opcional y la marca de tiempo.
+        el nombre de usuario opcional, la marca de tiempo y el ID de chat opcional.
         """
         message = {
             "role": role,
@@ -58,6 +58,12 @@ class ConversationHistory:
         if username:
             message["username"] = username
         self.history["messages"].append(message)
+
+        # Almacenar el ID de chat si se proporciona
+        if chat_id and chat_id not in self.history.get("chat_ids", []):
+            if "chat_ids" not in self.history:
+                self.history["chat_ids"] = []
+            self.history["chat_ids"].append(chat_id)
 
         # Recortar el historial si es necesario
         self.trim_history()
@@ -77,3 +83,9 @@ class ConversationHistory:
         Obtener los mensajes más recientes del historial de conversaciones.
         """
         return self.history["messages"][-num_messages:]
+
+    def get_all_chat_ids(self):
+        """
+        Obtener todos los IDs de chat almacenados en el historial de conversaciones.
+        """
+        return self.history.get("chat_ids", [])

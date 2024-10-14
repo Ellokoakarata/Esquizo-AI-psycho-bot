@@ -1,4 +1,4 @@
 conversation_logs/
 bot_errors.log
 test_logging.py
-
+user_chat_ids.txt
