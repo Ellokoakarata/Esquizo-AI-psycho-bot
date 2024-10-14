@@ -1,3 +1,4 @@
+# utils/history.py
 import os
 import json
 from datetime import datetime
@@ -8,7 +9,7 @@ if not os.path.exists(CONVERSATION_DIR):
 
 class ConversationHistory:
     def __init__(self, user_id, max_messages=100):
-        self.user_dir = os.path.join(CONVERSATION_DIR, str(user_id))  # Directorio por user_id
+        self.user_dir = os.path.join(CONVERSATION_DIR, "users", str(user_id))  # Directorio por user_id
         if not os.path.exists(self.user_dir):
             os.makedirs(self.user_dir)
 
@@ -57,13 +58,9 @@ class ConversationHistory:
         }
         if username:
             message["username"] = username
+        if chat_id:
+            message["chat_id"] = chat_id
         self.history["messages"].append(message)
-
-        # Almacenar el ID de chat si se proporciona
-        if chat_id and chat_id not in self.history.get("chat_ids", []):
-            if "chat_ids" not in self.history:
-                self.history["chat_ids"] = []
-            self.history["chat_ids"].append(chat_id)
 
         # Recortar el historial si es necesario
         self.trim_history()
@@ -83,9 +80,3 @@ class ConversationHistory:
         Obtener los mensajes más recientes del historial de conversaciones.
         """
         return self.history["messages"][-num_messages:]
-
-    def get_all_chat_ids(self):
-        """
-        Obtener todos los IDs de chat almacenados en el historial de conversaciones.
-        """
-        return self.history.get("chat_ids", [])
