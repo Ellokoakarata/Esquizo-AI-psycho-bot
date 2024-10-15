@@ -1,11 +1,24 @@
+{% if meta_prompt_content %}
 {{ meta_prompt_content }}
+{% endif %}
 
+{% if system_message %}
 {{ system_message }}
+{% endif %}
 
-{{rebel_v1}}
+{% if rebel_v1 %}
+{{ rebel_v1 }}
+{% endif %}
 
-{{rebel_v2}}
+{% if rebel_v2 %}
+{{ rebel_v2 }}
+{% endif %}
 
 {{ summarized_context }}
 
 {{ user_name }} (@{{ user_username }}): {{ user_message }}
+
+{% if image_analysis %}
+Análisis de la imagen:
+{{ image_analysis }}
+{% endif %}

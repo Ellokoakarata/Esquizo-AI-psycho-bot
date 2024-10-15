@@ -4,6 +4,8 @@ import os
 import logging
 import time
 import signal
+import json
+from datetime import datetime, timedelta
 from telebot import TeleBot, apihelper
 from requests.exceptions import RequestException
 from config import TELEGRAM_TOKEN
@@ -47,6 +49,31 @@ def get_all_user_chat_ids():
 
     return user_ids
 
+def load_welcome_log():
+    file_path = 'welcome_message_log.json'
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            welcome_log = json.load(file)
+    else:
+        welcome_log = {}
+    return welcome_log
+
+def save_welcome_log(welcome_log):
+    file_path = 'welcome_message_log.json'
+    with open(file_path, 'w') as file:
+        json.dump(welcome_log, file)
+
+def should_send_welcome(user_id, welcome_log):
+    last_sent_str = welcome_log.get(user_id)
+    if last_sent_str:
+        last_sent = datetime.fromisoformat(last_sent_str)
+        if datetime.now() - last_sent < timedelta(hours=24):
+            return False
+    return True
+
+def update_welcome_log(user_id, welcome_log):
+    welcome_log[user_id] = datetime.now().isoformat()
+
 def run_bot_with_reconnect(bot):
     logger.info("Iniciando el bot...")
 
@@ -54,14 +81,22 @@ def run_bot_with_reconnect(bot):
     welcome_message = "Embrace the chaos, for in the fragments lies the truth. Let's dance through the dissonance together."
     user_ids = get_all_user_chat_ids()  # Obtener los IDs de usuario
 
+    welcome_log = load_welcome_log()
+
     if user_ids:
-        logger.info("Enviando mensajes de bienvenida a los IDs cargados:")
+        logger.info("Verificando si se debe enviar mensajes de bienvenida a los IDs cargados:")
         for user_id in user_ids:
-            logger.info(f"Enviando mensaje a User ID: {user_id}")
-            try:
-                bot.send_message(user_id, welcome_message)
-            except Exception as e:
-                logger.error(f"Error al enviar mensaje a User ID {user_id}: {e}")
+            if should_send_welcome(user_id, welcome_log):
+                logger.info(f"Enviando mensaje a User ID: {user_id}")
+                try:
+                    bot.send_message(user_id, welcome_message)
+                    update_welcome_log(user_id, welcome_log)
+                except Exception as e:
+                    logger.error(f"Error al enviar mensaje a User ID {user_id}: {e}")
+            else:
+                logger.info(f"El mensaje de bienvenida ya se envió al usuario {user_id} en las últimas 24 horas.")
+        # Guardar el registro actualizado
+        save_welcome_log(welcome_log)
     else:
         logger.warning("No se encontraron IDs de usuario para enviar el mensaje de bienvenida.")
 

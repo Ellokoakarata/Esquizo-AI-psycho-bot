@@ -44,7 +44,7 @@ class PromptBuilder:
             logging.error(f"Error al cargar la plantilla {path}: {str(e)}")
             return None
 
-    def build_prompt(self, summarized_context, user_name, user_username, user_message):
+    def build_prompt(self, summarized_context, user_name, user_username, user_message, image_analysis=None):
         """
         Construir el prompt usando la plantilla cargada. 
         Los valores se reemplazan en la plantilla.
@@ -62,5 +62,6 @@ class PromptBuilder:
             summarized_context=summarized_context,
             user_name=user_name,
             user_username=user_username,
-            user_message=user_message
+            user_message=user_message,
+            image_analysis=image_analysis or ''
         )
