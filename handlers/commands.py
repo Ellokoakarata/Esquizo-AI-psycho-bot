@@ -69,8 +69,8 @@ def register_command_handlers(bot: TeleBot):
         user_id = str(message.from_user.id)
         history = ConversationHistory(user_id)
         model_provider = history.history.get('model_provider', 'groq').upper()
-        model_name = history.history.get('model_name', '').upper()
-        if model_provider == 'GROQ' and model_name:
+        model_name = history.history.get('model', 'default_model').upper()  # Cambiado a 'model'
+        if model_provider == 'GROQ' and model_name != 'DEFAULT_MODEL':
             bot.reply_to(message, f"You are currently using the model: **{model_provider} - {model_name}**.")
         else:
             bot.reply_to(message, f"You are currently using the model: **{model_provider}**.")
